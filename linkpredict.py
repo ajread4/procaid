@@ -28,7 +28,16 @@ def main():
 								  metavar='testquery')
 	args=parser.parse_args()
 
-	print(args.nodes)
+	print(args.edges)
+	graph=Predictor()
+	graph.ingest_file(args.train,"train")
+	graph.ingest_file(args.test,"test")
+	graph.feature_check(args.edges)
+	graph.process_train()
+	graph.process_test()
+	graph.createnode2vec()
+	graph.createlogreg()
+	graph.linkpredict()
 if __name__=="__main__":
 	try:
 		main()
