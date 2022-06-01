@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 
 
 class Predictor():
-    def __init__(self):
+    def __init__(self,numwalks,walklength,threshold_value,verbose):
         # Data Ingestion Variables
         self.json_data = []  # the input data in list form
         self.json_folder = []  # the input data files if provided as a data directory
@@ -35,19 +35,21 @@ class Predictor():
         self.newedgeattr = []  # a list of attributes of edges that exist in the test graph but do not exist in the training graph, in the form of node1--node2
         self.affirmed_testedge = []  # list of test edges that do exist in the training graph
 
+        '''
         # Splunk Variables
         self.credentials = {}
         self.baseurl = ""
         self.splunk_search = {}
+        '''
 
         # Node2Vec Variables
-        self.walklen = 5  # walk length for node2vec random walks
-        self.numwalk = 100  # number of walks
+        self.walklen = walklength  # walk length for node2vec random walks
+        self.numwalk = numwalks  # number of walks
         self.p = 0.125  # return parameter
         self.q = 2.0  # in-out parameter
 
         # Link Prediction Variables
-        self.threshold = 0.20  # the link prediction threshold, default is 0.2
+        self.threshold = threshold_value  # the link prediction threshold, default is 0.2
         self.hits = []  # the edges that are below a certain threshold for link prediction
         self.edge_predictions = []  # list of probabilites for each test edge embedding
 
@@ -59,6 +61,9 @@ class Predictor():
         self.test_edge_embeddings = []  # list of edge embeddings in the testing graph
         self.test_edge_labels = []  # labels corresponding to the test edges
 
+        # Utility variables
+        self.verbose=verbose
+
     # Ingest file for graph creation using JSON loads and Pandas DataFrames
     # Input: filepath - absolute location of the file path
     # Ouput: None
@@ -68,10 +73,8 @@ class Predictor():
             self.json_data.append(json.loads(l))
         if type=="train":
             self.traindb = pd.DataFrame(self.json_data)
-            #print(self.traindb)
         else:
             self.testdb = pd.DataFrame(self.json_data)
-            #print(self.testdb)
 
     # Ingest folder containing files for graph creation
     # Input: folderpath - absolute location of the folder
@@ -100,13 +103,14 @@ class Predictor():
     def set_threshold(self,input_threshold):
         self.threshold=input_threshold
 
-    # Add weights to the nodes
+    # Add weights to the nodes [Unused right now]
     # Input: input_Graph - NetworkX Graph to add node degrees to
     # Output: None
     def add_weights(self, input_Graph):
         for n in input_Graph.nodes():
             input_Graph.nodes[n]['weight'] = 1 / input_Graph.degree(n)
-        print(f'Done adding weights to node in graph')
+        if self.verbose:
+            print(f'Done adding weights to node in graph')
 
     # Combine two entities
     # Input: first - first entity, second - second entity
@@ -141,7 +145,8 @@ class Predictor():
         self.model = self.node2vec.fit(window=2, sample=0.1)
         self.hadamard = HadamardEmbedder(
             keyed_vectors=self.model.wv)  # embed edges as the product of the node embeddings
-        print("Done with node2vec instantiation")
+        if self.verbose:
+            print("Done with node2vec instantiation")
 
     # Instantiate the Logistic Regression classifier
     # Input: None
@@ -207,12 +212,14 @@ class Predictor():
     # Input: None
     # Output: None
     def linkpredict(self):
-        print('Beginning Link Prediction')
+        if self.verbose:
+            print('Beginning Link Prediction')
         self.pos_edge_embeddings, self.pos_edge_label = self.embed_edges(self.TrainGraph.edges(), 1)
         self.negative_embeds()
         self.fitpredict(self.combine(self.pos_edge_embeddings, self.neg_edge_embeddings),
                         self.combine(self.pos_edge_label, self.neg_edge_label))
-        print('Beginning Detection')
+        if self.verbose:
+            print('Beginning Detection')
         self.detect()
 
     # Conduct link prediction on the test edges
@@ -261,7 +268,8 @@ class Predictor():
     def checkerrors_node(self, testnode):
         # print(f'Checking the dataset and requested node to ensure compliance.')
         if testnode in list(self.traindb) and testnode in list(self.testdb):
-            print(f'Found {testnode} in dataset')
+            if self.verbose:
+                print(f'Found {testnode} in dataset')
             return True
         else:
             print(f'ERROR: Did not find node {testnode} in dataset')
@@ -274,7 +282,8 @@ class Predictor():
             n1,n2=self.split_edge(edge)
             if (self.checkerrors_node(n1)) and (self.checkerrors_node(n2)):
                 self.save_edge(edge)
-                print(f'Feature check complete')
+                if self.verbose:
+                    print(f'Feature check complete')
             else:
                 quit()
     # Save the edges for the graph
@@ -320,8 +329,9 @@ class Predictor():
                 #print(f'Node: {secondnode} and id: {nodeid_secondnode}')
                 self.trainedgesattr.append(self.create_edge(firstnode, secondnode))
                 self.TrainGraph.add_edge(nodeid_firstnode, nodeid_secondnode)
-        print(f"Number of Training Nodes: {len(self.TrainGraph.nodes())}")
-        print(f"Number of Training Edges: {len(self.TrainGraph.edges())}")
+        if self.verbose:
+            print(f"Number of Training Nodes: {len(self.TrainGraph.nodes())}")
+            print(f"Number of Training Edges: {len(self.TrainGraph.edges())}")
 
     def process_test(self):
         for row in self.testdb.itertuples():
@@ -335,8 +345,9 @@ class Predictor():
                 #print(f'Node: {secondnode} and id: {nodeid_secondnode}')
                 self.testedgesattr.append(self.create_edge(firstnode, secondnode))
                 self.TestGraph.add_edge(nodeid_firstnode, nodeid_secondnode)
-        print(f"Number of Testing Nodes: {len(self.TestGraph.nodes())}")
-        print(f"Number of Testing Edges: {len(self.TestGraph.edges())}")
+        if self.verbose:
+            print(f"Number of Testing Nodes: {len(self.TestGraph.nodes())}")
+            print(f"Number of Testing Edges: {len(self.TestGraph.edges())}")
 
     # Find the new edges
     # Input: None
