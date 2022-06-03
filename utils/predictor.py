@@ -243,7 +243,7 @@ class Predictor():
         if input_pred < self.threshold:
             final_edge = self.create_edge(self.return_nodeattr_fromid(int(input_edge[0])),
                                           self.return_nodeattr_fromid(int(input_edge[1])))
-            print(f'Edge: {final_edge} below threshold with link prediction:{input_pred}')
+            print(f'Edge: {final_edge} below threshold with link prediction: {input_pred}')
 
     # Ensure the request edges make sense, are not missing, and are not empty
     # Input: error_check - list of edges to check

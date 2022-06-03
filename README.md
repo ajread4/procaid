@@ -5,9 +5,11 @@ ProcAID stands for "Process Anomaly-based Intrusion Detection." The capability i
 1. Stage One: Unsupervised link prediction on a process creation log graph 
 2. Stage Two: Inverse leadership and inverse density analysis  
 
-Full explanation of ProcAID can be found here [ProcAID](https://www.proquest.com/openview/e4ce5ff777fc5943a8b4624677b3cad1/1.pdf?pq-origsite=gscholar&cbl=18750&diss=y).
+The full explanation of ProcAID can be found here [ProcAID](https://www.proquest.com/openview/e4ce5ff777fc5943a8b4624677b3cad1/1.pdf?pq-origsite=gscholar&cbl=18750&diss=y).
 
-For convenience and use-case purposes, this repository contains only Stage One of ProcAID. Stage Two of ProcAID will be located in a seperate repository.
+For convenience and use-case purposes, this repository contains the framework and algorithm to run Stage One of ProcAID with varying nodes, edges, thresholds, or parameters.
+
+Stage Two of ProcAID will be located in a seperate repository.
 
 ## Install
 ```
@@ -44,15 +46,16 @@ FILE OR FOLDER INPUT ARGUMENTS:
 1. Conduct unsupervised link prediction on host logs where the edges are between ```UserName``` and ```EventID```. 
 ```
 $ python3 linkpredict.py -train train_data.json -test test_data.json UserName--EventID
-Computing transition probabilities: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 9/9 [00:00<00:00, 21595.39it/s]
-Generating walks (CPU: 1): 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:00<00:00, 10898.26it/s]
-Edge: Comp067947$--4688 below threshold with link prediction:0.1120337033179818
-Edge: Comp067947$--4634 below threshold with link prediction:0.10267681339152787
-Edge: Comp067947$--4624 below threshold with link prediction:0.10192561404736276
-Edge: Comp447172$--4624 below threshold with link prediction:0.15070581500844746
-Edge: User529192--4624 below threshold with link prediction:0.1497220737896318
-Edge: User529192--4634 below threshold with link prediction:0.14582165695484503
-Edge: Comp715254$--4634 below threshold with link prediction:0.16846520887399277
+Computing transition probabilities: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 9/9 [00:00<00:00, 21147.75it/s]
+Generating walks (CPU: 1): 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:00<00:00, 10361.93it/s]
+Edge: Comp067947$--4688 below threshold with link prediction: 0.14468678519025702
+Edge: Comp067947$--4634 below threshold with link prediction: 0.11758853401959393
+Edge: Comp067947$--4624 below threshold with link prediction: 0.10847653073588186
+Edge: Comp447172$--4624 below threshold with link prediction: 0.16362865738986088
+Edge: Comp916004$--4672 below threshold with link prediction: 0.12773455618206841
+Edge: User529192--4624 below threshold with link prediction: 0.1482870988505544
+Edge: User529192--4634 below threshold with link prediction: 0.13785672081109693
+Edge: Comp715254$--4634 below threshold with link prediction: 0.14500785386691073
 ```
 2. Conduct unsupervised link prediction on host logs where the edges are between ```EventID``` and ```LogHost```, and ```UserName``` and ```DomainName``` in verbose mode. 
 ```
@@ -75,8 +78,8 @@ Number of Training Nodes: 12
 Number of Training Edges: 9
 Number of Testing Nodes: 14
 Number of Testing Edges: 11
-Computing transition probabilities: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 12/12 [00:00<00:00, 24256.22it/s]
-Generating walks (CPU: 1): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:00<00:00, 8104.15it/s]
+Computing transition probabilities: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 12/12 [00:00<00:00, 19730.16it/s]
+Generating walks (CPU: 1): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:00<00:00, 8590.13it/s]
 Node2Vec instantiated with p=0.125, q=2.0, walklength=5, numwalks=100
 Done with node2vec instantiation
 Logistic regression classifier instantiated
@@ -85,36 +88,48 @@ Beginning Anomalous Edge Detection
 Test Edge: User124533--Domain001 not found in training graph
 Test Edge: Comp649388$--Domain001 not found in training graph
 Confirmed edges: [(0, 1), (2, 3), (4, 5), (2, 3), (6, 5), (2, 3), (6, 5), (7, 3), (8, 5), (9, 3), (6, 5), (10, 3), (4, 5), (10, 3), (4, 5), (11, 3), (6, 5), (10, 3), (4, 5), (10, 3), (6, 5), (10, 3), (4, 5), (10, 3), (6, 5), (10, 3), (6, 5), (6, 5), (10, 3), (4, 5), (10, 3), (6, 5), (10, 3), (4, 5), (10, 3), (6, 5), (10, 3), (4, 5), (10, 3), (0, 1), (4, 5), (2, 3), (6, 5), (2, 3), (6, 5), (7, 3), (8, 5), (9, 3), (6, 5), (10, 3), (4, 5), (10, 3), (4, 5), (11, 3), (6, 5), (10, 3), (4, 5), (10, 3), (6, 5), (10, 3)]
-Edge: 4688--Comp649388 below threshold with link prediction:0.17901565968693298
-Edge: Comp067947$--Domain001 below threshold with link prediction:0.17345416850670756
-Edge: 4634--ActiveDirectory below threshold with link prediction:0.16135788234850051
-Edge: 4624--ActiveDirectory below threshold with link prediction:0.17153132747530125
-Edge: Comp447172$--Domain001 below threshold with link prediction:0.18359886499072067
-Edge: 4672--ActiveDirectory below threshold with link prediction:0.15038469704623472
-Edge: Comp916004$--Domain001 below threshold with link prediction:0.17698751619104305
-Edge: User529192--Domain001 below threshold with link prediction:0.18670064192212737
+Edge: 4688--Comp649388 below threshold with link prediction: 0.14436852254332727
+Edge: Comp067947$--Domain001 below threshold with link prediction: 0.17076364809377953
+Edge: 4634--ActiveDirectory below threshold with link prediction: 0.1670822829444345
+Edge: 4624--ActiveDirectory below threshold with link prediction: 0.16492791138344146
+Edge: Comp447172$--Domain001 below threshold with link prediction: 0.16929482039785573
+Edge: 4672--ActiveDirectory below threshold with link prediction: 0.1716846109743066
+Edge: Comp916004$--Domain001 below threshold with link prediction: 0.1563144122549408
+Edge: User529192--Domain001 below threshold with link prediction: 0.16312944749064529
+Edge: Comp715254$--Domain001 below threshold with link prediction: 0.16773827716922093
 ```
 3. Conduct unsupervised link prediction on host logs where the edges are between ```LogHost``` and ```DomainName```, and ```DomainName``` and ```UserName```, with a link prediction threshold of ```0.3``` and where Node2Vec does```1000``` random walks to learn the graph.
 ```
 $ python3 linkpredict.py -train train_data.json -test test_data.json LogHost--DomainName,DomainName--UserName -numwalk 1000 -threshold 0.3
-Computing transition probabilities: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:00<00:00, 14382.53it/s]
-Generating walks (CPU: 1): 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:00<00:00, 12671.69it/s]
-Edge: Comp649388--Domain001 below threshold with link prediction:0.14623839372876862
-Edge: Domain001--Comp067947$ below threshold with link prediction:0.15351358767086112
-Edge: ActiveDirectory--Domain001 below threshold with link prediction:0.14794925818583163
-Edge: Domain001--Comp447172$ below threshold with link prediction:0.15363190325064735
-Edge: Domain001--Comp916004$ below threshold with link prediction:0.1502812291174214
-Edge: Domain001--User529192 below threshold with link prediction:0.15083770391715126
-Edge: Domain001--Comp715254$ below threshold with link prediction:0.14616425824667778
+Computing transition probabilities: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:00<00:00, 12441.39it/s]
+Generating walks (CPU: 1): 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:00<00:00, 12549.53it/s]
+Edge: Comp649388--Domain001 below threshold with link prediction: 0.1545750896334678
+Edge: Domain001--Comp067947$ below threshold with link prediction: 0.15869929853152523
+Edge: ActiveDirectory--Domain001 below threshold with link prediction: 0.15460793703248177
+Edge: Domain001--Comp447172$ below threshold with link prediction: 0.15618177292848773
+Edge: Domain001--Comp916004$ below threshold with link prediction: 0.1516173728908642
+Edge: Domain001--User529192 below threshold with link prediction: 0.1533558378087372
+Edge: Domain001--Comp715254$ below threshold with link prediction: 0.15618532668322663
+```
+
+## ProcAID Stage One Parameters 
+To fully emulate Stage One of ProcAID with Process Creation logs, use the following edges and parameters (some of which are set by default): 
+```
+Edges: User--ProcessPath,ProcessPath--ParentProcessPath,User--ParentProcessPath
+p=0.125
+q=2.0
+numwalk=100
+walklength=5
+threshold=0.2
 ```
 ## File and Directory Information 
 
 - ```linkpredict.py``` 
   - This is the main Python script that runs the unsupervised anomaly detection algorithm. 
 - ```utils```
-  - This directory holds the ```Predictor``` class within ```predictor.py``` which is used by ```linkpredict.py``` to create graphs, analyze them, and conduct link prediction.
+  - This directory contains```predictor.py``` and the ```Predictor``` class which is used by ```linkpredict.py``` to create graphs, analyze them, and conduct link prediction.
 - ```requirements.txt```
-  - This contains the requirements for running this script. 
+  - This file contains the requirements for running this script. 
 
 ## Dependencies 
 This script uses Python 3.8.10 for operation. It has not been fully tested on other versions of Python. 
