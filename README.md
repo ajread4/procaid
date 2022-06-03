@@ -116,10 +116,10 @@ Edge: Domain001--Comp715254$ below threshold with link prediction: 0.15618532668
 To fully emulate Stage One of ProcAID with Process Creation logs, use the following edges and parameters (some of which are set by default): 
 ```
 Edges: User--ProcessPath,ProcessPath--ParentProcessPath,User--ParentProcessPath
-p=0.125
-q=2.0
+ret=0.125
+in_out=2.0
 numwalk=100
-walklength=5
+walklen=5
 threshold=0.2
 ```
 ## File and Directory Information 
@@ -132,7 +132,14 @@ threshold=0.2
   - This file contains the requirements for running this script. 
 
 ## Dependencies 
-This script uses Python 3.8.10 for operation. It has not been fully tested on other versions of Python. 
+This script uses Python 3.8.10 for operation. It has not been fully tested on other versions of Python.
+
+## Planned Features
+There are a few features to be added in the future: 
+
+- Output anomalous edges in various formats to include file, database, etc
+- Full Splunk integration 
+- Options for link prediction classifier
 
 ## Publication
 The full ProcAID publication is located here: [ProcAID](https://www.proquest.com/openview/e4ce5ff777fc5943a8b4624677b3cad1/1.pdf?pq-origsite=gscholar&cbl=18750&diss=y)
