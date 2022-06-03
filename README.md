@@ -1,11 +1,22 @@
 ## ProcAID
 
-ProcAID stands for "Process Anomaly-based Intrusion Detection." The solution is made of two stages: 
+ProcAID stands for "Process Anomaly-based Intrusion Detection." The capability is made of two stages: 
 
 1. Stage One: Unsupervised link prediction on a process creation log focused graph 
 2. Stage Two: Inverse leadership and inverse density analysis  
 
 For convenience and use-case purposes, this repository contains only Stage one of ProcAID. 
+
+## Install
+```
+git clone https://github.com/ajread4/procaid_stage1.git
+cd procaid_stage1
+pip3 install -r requirements.txt
+```
+## Usage
+```
+
+```
 
 ## Publication
 

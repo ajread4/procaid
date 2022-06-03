@@ -154,8 +154,7 @@ class Predictor():
     def createlogreg(self):
         self.edge_classifier = LogisticRegression(random_state=42, max_iter=100000)
 
-        # Embed edges using Hadamard embedding
-
+    # Embed edges using Hadamard embedding
     # Input: edges - list of edges formatted Node1--Node2, label - specific value to assign the edge (either 0 or 1)
     # Output: embedded_edges - list of edges embedded in the feature space, embedded_labels - the labels that correspond to each embedded edge
     def embed_edges(self, edges, label):
@@ -176,8 +175,8 @@ class Predictor():
             self.random_edge = np.random.choice(list(self.TrainGraph.nodes()), 2, replace=False, p=normalized_probs)
             random_node1 = random.choice(list(self.TrainGraph.nodes()))
             random_node2 = random.choice(list(self.TrainGraph.nodes()))
-            random_edge = self.create_node_from_ids(random_node1, random_node2)
-            random_edge_rev = self.create_node_from_ids(random_node2, random_node1)
+            random_edge = self.create_edge_from_ids(random_node1, random_node2)
+            random_edge_rev = self.create_edge_from_ids(random_node2, random_node1)
             if random_edge not in self.TrainGraph.edges() and random_edge_rev not in self.TrainGraph.edges():
                 self.neg_edge_embeddings.append(self.hadamard[str(random_node1), str(random_node2)])
                 self.neg_edge_label.append(0.)
@@ -275,6 +274,9 @@ class Predictor():
             print(f'ERROR: Did not find node {testnode} in dataset')
             return False
 
+    # Run error checking mechanisms on input edges
+    # Input: input_edges - list of input edges in the form of Node1--Node2,Node2--Node3
+    # Output: None
     def feature_check(self,input_edges):
         edgelist=input_edges.split(",")
         self.checkerrors_edge(edgelist)
@@ -300,8 +302,12 @@ class Predictor():
         node2 = str(input_edge).split("--")[1]
         return node1, node2
 
-    def create_node_from_ids(self, n1, n2):
+    # Create edge from two indices of nodes
+    # Input: n1 - first node id, n2 - second node id
+    # Output: (n1,n2) - edge created with two node ids
+    def create_edge_from_ids(self, n1, n2):
         return (n1, n2)
+
     # Find the attributes for the node
     # Input: r - row within the Pandas DataFrame of data, requested_node - node to find attributes for
     # Output: attributes of a specific column in the Pandas DataFrame
