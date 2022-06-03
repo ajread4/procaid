@@ -10,14 +10,17 @@ def main():
 	parser.add_argument('-numwalk',type=int,action='store',help='specify the number of walks for Node2Vec, default is 100',metavar='int',default=100)
 	parser.add_argument('-walklen',type=int,action='store',help='specify the walk length for Node2Vec, default is 5',metavar='int',default=5)
 	parser.add_argument('-threshold',type=float,action='store',help='specify the link prediction threshold, default is 0.2',metavar='int',default=0.2)
+	parser.add_argument('-ret', type=float, action='store',help='specify the return parameter (p) for Node2Vec, default is 0.125', metavar='int', default=0.125)
+	parser.add_argument('-in_out', type=float, action='store',help='specify the in out parameter (q) for Node2Vec, default is 2.0', metavar='int',default=2.0)
 	parser.add_argument("-v","--verbose", help="run linkpredict in verbose mode",action="store_true")
-	parser.add_argument("-o","--output",type=str,action="store",help="specify file location to output results",metavar="file")
+	#parser.add_argument("-o","--output",type=str,action="store",help="specify file location to output results",metavar="file") # to be added
 
 	SimpleIngestType=parser.add_argument_group("FILE OR FOLDER INPUT ARGUMENTS")
 	SimpleIngestType.add_argument('-train',dest='train',action='store',help='specify the location of the json formatted training data, can be file or folder',metavar='traindata')
 	SimpleIngestType.add_argument('-test',dest='test',action='store',help='specify the location of the json formatted testing data, can be file or folder',metavar='testdata')
 
 	'''
+	# To be added 
 	SplunkIngestType =parser.add_argument_group('SPLUNK INPUT ARGUMENTS')
 	SplunkIngestType.add_argument('-url', dest='baseurl', type=str, action='store',
 								  help='specify the url for the Splunk REST API (normally port 8089)',
@@ -35,12 +38,12 @@ def main():
 	'''
 	args=parser.parse_args()
 
-	# Instantiate the class
-	graph=Predictor(args.numwalk,args.walklen,args.threshold,args.verbose)
+	# Instantiate the Predictor class
+	graph=Predictor(args.ret,args.in_out,args.numwalk,args.walklen,args.threshold,args.verbose)
 
 	# Ingest data
-	graph.ingest_file(args.train,"train")
-	graph.ingest_file(args.test,"test")
+	graph.ingest_folder(args.train,"train")
+	graph.ingest_folder(args.test,"test")
 
 	# Check for input errors
 	graph.feature_check(args.edges)

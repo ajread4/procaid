@@ -11,9 +11,8 @@ from sklearn.metrics import average_precision_score
 from sklearn.metrics import roc_auc_score, roc_curve, average_precision_score
 from sklearn.model_selection import train_test_split
 
-
 class Predictor():
-    def __init__(self,numwalks,walklength,threshold_value,verbose):
+    def __init__(self,ret,in_out,numwalks,walklength,threshold_value,verbose):
         # Data Ingestion Variables
         self.json_data = []  # the input data in list form
         self.json_folder = []  # the input data files if provided as a data directory
@@ -27,16 +26,16 @@ class Predictor():
         self.edgestatus = True  # a boolean variable to ensure and edge can or cannot exist
         self.traindb = pd.DataFrame()  # a Pandas DataFrame with the graph data
         self.testdb = pd.DataFrame()  # a Pandas DataFrame with the graph data
-        self.trainedgesattr=[]
-        self.testedgesattr=[]
+        self.trainedgesattr=[] # training edge attributes
+        self.testedgesattr=[] # test edge attributes
 
         # New Edge Variables
-        self.affirmed_testedge_keymap = []
+        self.affirmed_testedge_keymap = [] # keymap for test edges that are confirmed to exist in the training graph as well
         self.newedgeattr = []  # a list of attributes of edges that exist in the test graph but do not exist in the training graph, in the form of node1--node2
         self.affirmed_testedge = []  # list of test edges that do exist in the training graph
 
         '''
-        # Splunk Variables
+        # Splunk Variables - to be implemented later 
         self.credentials = {}
         self.baseurl = ""
         self.splunk_search = {}
@@ -45,8 +44,8 @@ class Predictor():
         # Node2Vec Variables
         self.walklen = walklength  # walk length for node2vec random walks
         self.numwalk = numwalks  # number of walks
-        self.p = 0.125  # return parameter
-        self.q = 2.0  # in-out parameter
+        self.p = ret  # return parameter
+        self.q = in_out  # in-out parameter
 
         # Link Prediction Variables
         self.threshold = threshold_value  # the link prediction threshold, default is 0.2
@@ -68,7 +67,8 @@ class Predictor():
     # Input: filepath - absolute location of the file path
     # Ouput: None
     def ingest_file(self, filepath,type):
-        print(f"Beginning ingestion of data at file {filepath}")
+        if self.verbose:
+            print(f"Beginning ingestion of data at file {filepath}")
         for l in open(filepath).readlines():
             self.json_data.append(json.loads(l))
         if type=="train":
@@ -80,28 +80,21 @@ class Predictor():
     # Input: folderpath - absolute location of the folder
     # Output: None
     def ingest_folder(self, folderpath,type):
-        print(f"Beginning ingestion of data at folder {folderpath}")
+        if self.verbose:
+            print(f"Beginning ingestion of data at folder {folderpath}")
         for (root, directory, files) in sorted(os.walk(folderpath)):
             if files:
                 for f in files:
                     self.json_folder.append(u'%s' % os.path.join(str(root), str(f)))
-        print(f"Done walking folder {folderpath}")
+        if self.verbose:
+            print(f"Done walking folder {folderpath}")
         for j in self.json_folder:
             self.ingest_file(j,type)
-
-        # If the folder is really just a single file
-        print(f'{folderpath} is a single file.')
         if len(self.json_folder) == 0:
+            # If the folder is really just a single file
+            if self.verbose:
+                print(f'{folderpath} is a single file.')
             self.ingest_file(folderpath,type)
-
-    def set_walk_length(self,input_walklen):
-        self.walklen=input_walklen
-
-    def set_walk_num(self,input_walknum):
-        self.numwalk=input_walknum
-
-    def set_threshold(self,input_threshold):
-        self.threshold=input_threshold
 
     # Add weights to the nodes [Unused right now]
     # Input: input_Graph - NetworkX Graph to add node degrees to
@@ -140,11 +133,11 @@ class Predictor():
     # Input: None
     # Output: None
     def createnode2vec(self):
-        self.node2vec = Node2Vec(self.TrainGraph, walk_length=self.walklen, num_walks=self.numwalk, p=self.p,
-                                 q=self.q)  # https://arxiv.org/pdf/1607.00653.pdf
+        self.node2vec = Node2Vec(self.TrainGraph, walk_length=self.walklen, num_walks=self.numwalk, p=self.p,q=self.q)  # https://arxiv.org/pdf/1607.00653.pdf
+        if self.verbose:
+            print(f'Node2Vec instantiated with p={self.p}, q={self.q}, walklength={self.walklen}, numwalks={self.numwalk}')
         self.model = self.node2vec.fit(window=2, sample=0.1)
-        self.hadamard = HadamardEmbedder(
-            keyed_vectors=self.model.wv)  # embed edges as the product of the node embeddings
+        self.hadamard = HadamardEmbedder(keyed_vectors=self.model.wv)  # embed edges as the product of the node embeddings
         if self.verbose:
             print("Done with node2vec instantiation")
 
@@ -153,6 +146,8 @@ class Predictor():
     # Output: None
     def createlogreg(self):
         self.edge_classifier = LogisticRegression(random_state=42, max_iter=100000)
+        if self.verbose:
+            print(f'Logistic regression classifier instantiated')
 
     # Embed edges using Hadamard embedding
     # Input: edges - list of edges formatted Node1--Node2, label - specific value to assign the edge (either 0 or 1)
@@ -218,7 +213,7 @@ class Predictor():
         self.fitpredict(self.combine(self.pos_edge_embeddings, self.neg_edge_embeddings),
                         self.combine(self.pos_edge_label, self.neg_edge_label))
         if self.verbose:
-            print('Beginning Detection')
+            print('Beginning Anomalous Edge Detection')
         self.detect()
 
     # Conduct link prediction on the test edges
@@ -226,7 +221,8 @@ class Predictor():
     # Output: None
     def detect(self):
         self.newedge()  # check for new edges
-        # print(f'Confirmed edges: {self.affirmed_testedge_keymap}')
+        if self.verbose:
+            print(f'Confirmed edges: {self.affirmed_testedge_keymap}')
         self.test_edge_embeddings, _ = self.embed_edges(self.affirmed_testedge_keymap, 0)
         self.edge_predictions = self.fitpredictproba(self.test_edge_embeddings)
         pred_dictionary = {self.affirmed_testedge_keymap[i]: self.edge_predictions[i] for i in
@@ -323,6 +319,9 @@ class Predictor():
             self.keymap.append(str(attr))
         return self.keymap.index(str(attr))
 
+    # Create Train Graph using TrainDB
+    # Input: None
+    # Output: None
     def process_train(self):
         for row in self.traindb.itertuples():
             for e in self.edges:
@@ -339,6 +338,9 @@ class Predictor():
             print(f"Number of Training Nodes: {len(self.TrainGraph.nodes())}")
             print(f"Number of Training Edges: {len(self.TrainGraph.edges())}")
 
+    # Create Test Graph using TestDB
+    # Input: None
+    # Output: None
     def process_test(self):
         for row in self.testdb.itertuples():
             for e in self.edges:
@@ -361,10 +363,10 @@ class Predictor():
     def newedge(self):
         for edg in self.testedgesattr:
             if edg not in self.trainedgesattr and self.reverse_edge(edg) not in self.trainedgesattr:
-                # print(f'Edge {edg} not found in training graph')
+                if self.verbose:
+                    print(f'Test Edge: {edg} not found in training graph')
                 self.newedgeattr.append(edg)
             else:
-                # print(f'Edge {edg} found in training graph')
                 self.affirmed_testedge.append(edg)
                 n1, n2 = self.split_edge(edg)
                 self.affirmed_testedge_keymap.append((self.get_keymap(str(n1)), self.get_keymap(str(n2))))
