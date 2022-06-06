@@ -9,7 +9,7 @@ The full explanation of ProcAID can be found here [ProcAID](https://www.proquest
 
 For convenience and use-case purposes, this repository contains the framework and algorithm to run Stage One of ProcAID with varying nodes, edges, thresholds, or parameters.
 
-Stage Two of ProcAID will be located in a seperate repository.
+Stage Two of ProcAID can be found [here](https://github.com/ajread4/procaid_stage2).
 
 ## Install
 ```
