@@ -146,3 +146,6 @@ The full ProcAID publication is located here: [ProcAID](https://www.proquest.com
 
 ## Author
 All of the code was written by me, AJ Read, for my thesis at GW. 
+- Twitter: [ajread3](https://twitter.com/ajread3)
+- Github: [ajread4](https://github.com/ajread4)
+- LinkedIn: [Austin Read](https://www.linkedin.com/in/austin-read-88953b189/)
