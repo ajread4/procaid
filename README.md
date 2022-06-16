@@ -37,8 +37,8 @@ optional arguments:
   -v, --verbose     run linkpredict in verbose mode
 
 FILE OR FOLDER INPUT ARGUMENTS:
-  -train traindata  specify the location of the json formatted training data, can be file or folder
-  -test testdata    specify the location of the json formatted testing data, can be file or folder
+  -train traindata  specify the location of the new line delimited json formatted training data, can be file or folder
+  -test testdata    specify the location of the new line delimited json formatted testing data, can be file or folder
 ```
 
 ## Example Usage

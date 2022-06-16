@@ -16,8 +16,8 @@ def main():
 	#parser.add_argument("-o","--output",type=str,action="store",help="specify file location to output results",metavar="file") # to be added
 
 	SimpleIngestType=parser.add_argument_group("FILE OR FOLDER INPUT ARGUMENTS")
-	SimpleIngestType.add_argument('-train',dest='train',action='store',help='specify the location of the json formatted training data, can be file or folder',metavar='traindata')
-	SimpleIngestType.add_argument('-test',dest='test',action='store',help='specify the location of the json formatted testing data, can be file or folder',metavar='testdata')
+	SimpleIngestType.add_argument('-train',dest='train',action='store',help='specify the location of the new line delimited json formatted training data, can be file or folder',metavar='traindata')
+	SimpleIngestType.add_argument('-test',dest='test',action='store',help='specify the location of the new line delimited json formatted testing data, can be file or folder',metavar='testdata')
 
 	'''
 	# To be added 
